@@ -43,12 +43,16 @@ else()
 	list (APPEND DARKNET_CFLAGS "-Wno-unused-result")
 	list (APPEND DARKNET_CFLAGS "-Wno-deprecated-declarations")
 	list (APPEND DARKNET_CFLAGS "-Wno-return-type-c-linkage")
-	list (APPEND DARKNET_CFLAGS "-O2")
+    if (CMAKE_BUILD_TYPE STREQUAL Debug)
+        list(APPEND DARKNET_CFLAGS "-DDEBUG")
+    else()
+	    list (APPEND DARKNET_CFLAGS "-O2")
+    endif()
 endif()
 
 # Find OpenCV
 if (DARKNET_OPENCV)
-	find_package(OpenCV REQUIRED)
+	find_package(OpenCV REQUIRED PATHS /data2/process_data/caojihua/Download/opencv/build/install NO_DEFAULT_PATH NO_SYSTEM_ENVIRONMENT_PATH NO_CMAKE_PATH)
 	add_library(opencv INTERFACE IMPORTED)
 	set_property(TARGET opencv PROPERTY
 		INTERFACE_INCLUDE_DIRECTORIES ${OpenCV_INCLUDE_DIRS})
@@ -70,7 +74,7 @@ if (DARKNET_GPU)
 	if (DARKNET_ARM)
 		list (APPEND DARKNET_DEFINITIONS ARM)
 	else()
-		find_package(clBLAS REQUIRED)
+        find_package(clBLAS REQUIRED PATHS /data2/process_data/caojihua/Download/clBLAS/src/build/install/lib64/cmake/clBLAS)
 		add_library(clblas INTERFACE IMPORTED)
 		set_property(TARGET clblas PROPERTY
 			INTERFACE_INCLUDE_DIRECTORIES ${CLBLAS_INCLUDE_DIRS})
@@ -194,7 +198,7 @@ set (DARKNET_PUBLIC_HEADERS
     "src/batchnorm_layer.h"
     "src/blas.h"
     "src/box.h"
-    "src/bugfixes.h"
+    #"src/bugfixes.h"
     "src/classifier.h"
     "src/col2im.h"
     "src/connected_layer.h"
@@ -232,7 +236,7 @@ set (DARKNET_PUBLIC_HEADERS
     "src/stb_image.h"
     "src/stb_image_write.h"
     "src/tree.h"
-    "src/unit.h"
+    #"src/unit.h"
     "src/utils.h"
     "src/opencl.h"
     "src/yolo_layer.h"
@@ -316,11 +320,13 @@ function (ConfigureBinary target)
 #    endif()
 
     target_link_libraries(${target} "m" "pthread")
+    install(TARGETS ${target}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 endfunction()
 
 function (ConfigureLibrary target)
     target_include_directories(${target} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        #$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:include>
     )
     install(TARGETS ${target} EXPORT ${CMAKE_PROJECT_NAME}
@@ -352,7 +358,14 @@ if (NOT DARKNET_NO_BINARY)
     ConfigureBinary(${DARKNET_BINARY})
 endif()
 
+set(EXEC_SH 
+    "examples/evaluate_coco.sh"
+    "examples/test_one_img.sh")
+
 install(FILES ${DARKNET_PUBLIC_HEADERS} ${DARKNET_WINDOWS_PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME})
+
+install(PROGRAMS ${EXEC_SH} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY DESTINATION ${CMAKE_INSTALL_LIBDIR}/results)
 
 install(EXPORT ${CMAKE_PROJECT_NAME} DESTINATION share/${CMAKE_PROJECT_NAME}/cmake)
 

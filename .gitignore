@@ -34,3 +34,11 @@ ehthumbs.db
 Icon?
 Thumbs.db
 *.swp
+
+# customed by Opt
+trained_model
+cmake_install.cmake
+darknetConfig.cmake
+CMakeCache.txt
+CMakeFiles
+install

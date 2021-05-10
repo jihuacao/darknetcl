@@ -360,12 +360,22 @@ endif()
 
 set(EXEC_SH 
     "examples/evaluate_coco.sh"
-    "examples/test_one_img.sh")
+    "examples/test_one_img.sh"
+    "examples/tiny_test_one_img.sh"
+    "examples/evaluate_coco-debug.sh"
+    "examples/test_one_img-debug.sh"
+    "examples/tiny_test_one_img-debug.sh"
+    )
 
 install(FILES ${DARKNET_PUBLIC_HEADERS} ${DARKNET_WINDOWS_PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME})
 
 install(PROGRAMS ${EXEC_SH} DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY DESTINATION ${CMAKE_INSTALL_LIBDIR}/results)
+install(DIRECTORY "./cfg" DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY "./data" DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY DESTINATION ${CMAKE_INSTALL_LIBDIR}/trained_model/coco17512x512)
+install(DIRECTORY DESTINATION ${CMAKE_INSTALL_LIBDIR}/trained_model/coco17512x512/yolo4)
+install(DIRECTORY DESTINATION ${CMAKE_INSTALL_LIBDIR}/trained_model/coco17512x512/yolo4-tiny)
 
 install(EXPORT ${CMAKE_PROJECT_NAME} DESTINATION share/${CMAKE_PROJECT_NAME}/cmake)
 

@@ -1117,6 +1117,7 @@ network *parse_network_cfg(char *filename)
     list *options = s->options;
     if(!is_network(s)) error("First section must be [net] or [network]");
     parse_net_options(options, net);
+    // todo-caojihua: 有待改进，解析cfg代码出错，不能正确解析batch
     net->batch = 1;
 
     params.h = net->h;

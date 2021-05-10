@@ -714,7 +714,7 @@ detection *make_network_boxes(network *net, float thresh, int *num)
 {
 	layer l = net->layers[net->n - 1];
 	int i;
-	int nboxes = num_detections(net, thresh);
+	int nboxes = num_detections(net, thresh); // todo: caojihua 对于tiny-yolo4模型，此处存在问题
 	if(num) *num = nboxes;
 	detection *dets = calloc(nboxes, sizeof(detection));
 	for(i = 0; i < nboxes; ++i){

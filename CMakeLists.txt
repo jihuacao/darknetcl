@@ -32,23 +32,27 @@ set (DARKNET_BINARY bindarknet)
 set (DARKNET_LIBRARY libdarknet)
 set (DARKNET_LIBRARY_STATIC libdarknet_s)
 
+message(STATUS ${CMAKE_SYSTEM_NAME})
+
 if (DARKNET_DEBUG OR DARKNET_TESTING)
     list (APPEND DARKNET_CFLAGS "-g")
 else()
 	if (DARKNET_OPENMP)
 		list (APPEND DARKNET_CFLAGS "-openmp")
 	endif()
-	list (APPEND DARKNET_CFLAGS "-Wfatal-errors")
-	list (APPEND DARKNET_CFLAGS "-Wno-unused-variable")
-	list (APPEND DARKNET_CFLAGS "-Wno-unused-result")
-	list (APPEND DARKNET_CFLAGS "-Wno-deprecated-declarations")
-	list (APPEND DARKNET_CFLAGS "-Wno-return-type-c-linkage")
-	list (APPEND DARKNET_CFLAGS "-O2")
+    if (${CMAKE_SYSTEM_NAME} MATCHES "Linux") 
+	    list (APPEND DARKNET_CFLAGS "-Wno-unused-variable")
+	    list (APPEND DARKNET_CFLAGS "-Wno-unused-result")
+	    list (APPEND DARKNET_CFLAGS "-Wno-deprecated-declarations")
+	    list (APPEND DARKNET_CFLAGS "-Wno-return-type-c-linkage")
+	    list (APPEND DARKNET_CFLAGS "-O2")
+    else()
+    endif()
 endif()
 
 # Find OpenCV
 if (DARKNET_OPENCV)
-	find_package(OpenCV REQUIRED)
+	find_package(OpenCV 3.1 REQUIRED)
 	add_library(opencv INTERFACE IMPORTED)
 	set_property(TARGET opencv PROPERTY
 		INTERFACE_INCLUDE_DIRECTORIES ${OpenCV_INCLUDE_DIRS})
@@ -67,16 +71,16 @@ if (DARKNET_GPU)
         INTERFACE_LINK_LIBRARIES ${OpenCL_LIBRARY})
     list (APPEND DARKNET_DEFINITIONS GPU CL_TARGET_OPENCL_VERSION=120)
 	# Raspberry PI
-	if (DARKNET_ARM)
-		list (APPEND DARKNET_DEFINITIONS ARM)
-	else()
-		find_package(clBLAS REQUIRED)
-		add_library(clblas INTERFACE IMPORTED)
-		set_property(TARGET clblas PROPERTY
-			INTERFACE_INCLUDE_DIRECTORIES ${CLBLAS_INCLUDE_DIRS})
-		set_property(TARGET clblas PROPERTY
-			INTERFACE_LINK_LIBRARIES ${CLBLAS_LIBRARIES})
-	endif()
+	#if (DARKNET_ARM)
+	#	list (APPEND DARKNET_DEFINITIONS ARM)
+	#else()
+	#	find_package(clBLAS REQUIRED PATHS "E:\\clBLAS")
+	#	add_library(clblas INTERFACE IMPORTED)
+	#	set_property(TARGET clblas PROPERTY
+	#		INTERFACE_INCLUDE_DIRECTORIES ${CLBLAS_INCLUDE_DIRS})
+	#	set_property(TARGET clblas PROPERTY
+	#		INTERFACE_LINK_LIBRARIES ${CLBLAS_LIBRARIES})
+	#endif()
 endif()
 
 # Safe Training
@@ -328,6 +332,10 @@ function (ConfigureLibrary target)
         LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 endfunction()
+
+include_directories(${PROJECT_SOURCE_DIR}/3rdparty/pthreads/include)
+include_directories(${PROJECT_SOURCE_DIR}/3rdparty/stb/include)
+link_directories(${PROJECT_SOURCE_DIR}/3rdparty/pthreads/lib)
 
 if (DARKNET_SHARED)
     add_library(${DARKNET_LIBRARY} SHARED ${DARKNET_SOURCES} ${DARKNET_CPU_SOURCES}

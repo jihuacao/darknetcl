@@ -13,6 +13,7 @@
 
 #include "opencl.h"
 #include "layer.h"
+#define OUT OUT_TEMP
 
 cl_program* opencl_blas_kernel_program;
 
@@ -71,58 +72,58 @@ cl_kernel* opencl_scal_add_kernel;
 void blas_kernel_init(void)
 {
     if (opencl_device_id_t == 0) {
-        opencl_blas_kernel_program = calloc(opencl_device_ct_t, sizeof(cl_program));
-        softmax_device_kernel = calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_scale_bias_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_backward_scale_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_add_bias_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_backward_bias_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_adam_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_normalize_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_normalize_delta_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_l2norm_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_variance_delta_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_accumulate_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_mean_delta_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_mean_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_variance_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_reorg_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_axpy_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_pow_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_const_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_constrain_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_supp_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_add_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_scal_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_fill_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_mask_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_copy_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_mul_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_fast_mean_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_fast_variance_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_fast_mean_delta_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_fast_variance_delta_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_flatten_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_shortcut_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_smooth_l1_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_softmax_x_ent_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_logistic_x_ent_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_l2_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_l1_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_wgan_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_inter_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_deinter_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_weighted_sum_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_weighted_delta_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_mult_add_into_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_softmax_tree_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_softmax_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_scale_mask_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_dot_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_upsample_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_gemm_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_mean_array_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
-        opencl_scal_add_kernel= calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_blas_kernel_program = (cl_program*)calloc(opencl_device_ct_t, sizeof(cl_program));
+        softmax_device_kernel = (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_scale_bias_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_backward_scale_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_add_bias_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_backward_bias_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_adam_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_normalize_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_normalize_delta_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_l2norm_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_variance_delta_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_accumulate_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_mean_delta_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_mean_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_variance_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_reorg_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_axpy_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_pow_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_const_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_constrain_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_supp_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_add_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_scal_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_fill_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_mask_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_copy_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_mul_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_fast_mean_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_fast_variance_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_fast_mean_delta_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_fast_variance_delta_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_flatten_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_shortcut_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_smooth_l1_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_softmax_x_ent_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_logistic_x_ent_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_l2_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_l1_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_wgan_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_inter_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_deinter_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_weighted_sum_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_weighted_delta_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_mult_add_into_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_softmax_tree_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_softmax_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_scale_mask_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_dot_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_upsample_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_gemm_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_mean_array_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
+        opencl_scal_add_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
     }
     
     opencl_load_buffer(blas_kernel_source, strlen(blas_kernel_source), &opencl_blas_kernel_program[opencl_device_id_t]);
@@ -914,4 +915,5 @@ void gemm_offset_gpu(
     );
 }
 #endif
+#undef OUT
 #endif // GPU

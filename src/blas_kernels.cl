@@ -1,8 +1,6 @@
 #ifndef __BLAS_KERNELS_CL__
 #define __BLAS_KERNELS_CL__
 
-static const char* const blas_kernel_source = CONVERT_KERNEL_TO_STRING(
-
 /*
 static void atomicAdd(volatile __global float *a, float v) {
     //float s = v;
@@ -30,6 +28,8 @@ static void atomicAdd(volatile __global float *a, float v) {
 }
 */
 
+static const char* const blas_kernel_source = CONVERT_KERNEL_TO_STRING(
+
 __kernel void scale_bias_kernel(int N, __global float *output, __global float *biases, int batch, int n, int size)
 {
     int index = (get_group_id(0) + get_group_id(1)*get_num_groups(0)) * get_local_size(0) + get_local_id(0);
@@ -40,8 +40,8 @@ __kernel void scale_bias_kernel(int N, __global float *output, __global float *b
 
     output[index] *= biases[i];
 }
-
-
+);
+/*temp
 __kernel void backward_scale_kernel(int tuning, __local float* sums, int batch, int n, int size, __global float *x_norm, __global float *delta, __global float *scale_updates)
 {
     int t = get_global_id(0);
@@ -834,6 +834,5 @@ __kernel void mean_array_kernel(int N, float alpha, __global float *s, __global 
     a[i] *= alpha;
     s[i] = a[i];
 }
-
-);
+*/
 #endif

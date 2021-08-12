@@ -1,11 +1,17 @@
 cmake_minimum_required(VERSION 3.7.2 FATAL_ERROR)
 
-set(CMAKE_C_COMPILER "gcc")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Unix")
+    set(CMAKE_C_COMPILER "gcc")
+endif()
 set(CMAKE_CXX_COMPILER "g++")
 
 set(CMAKE_CXX_STANDARD 11)
 
-project(darknet LANGUAGES C CXX)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Unix")
+    project(darknet LANGUAGES C CXX)
+else()
+    project(darknet LANGUAGES CXX)
+endif()
 
 option(DARKNET_CPU "Enable CPU support" OFF)
 option(DARKNET_OPENCV "Enable OpenCV support" ON)
@@ -47,40 +53,82 @@ else()
 	    list (APPEND DARKNET_CFLAGS "-Wno-return-type-c-linkage")
 	    list (APPEND DARKNET_CFLAGS "-O2")
     else()
+        add_library(POSIX INTERFACE IMPORTED)
+        set_property(TARGET POSIX PROPERTY INTERFACE_INCLUDE_DIRECTORIES "E:/workspace/libunistd/unistd")
+        set_property(TARGET POSIX PROPERTY INTERFACE_LINK_DIRECTORIES "E:/workspace/libunistd/build/Release")
+        set_property(TARGET POSIX PROPERTY INTERFACE_LINK_LIBRARIES "libunistd.lib")
+        add_library(pthread INTERFACE IMPORTED)
+        set_property(TARGET pthread PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/3rdparty/pthreads/include)
+        set_property(TARGET pthread PROPERTY INTERFACE_LINK_DIRECTORIES ${PROJECT_SOURCE_DIR}/3rdparty/pthreads/lib)
+        set_property(TARGET pthread PROPERTY INTERFACE_LINK_LIBRARIES "pthreadVC2.lib")
+        add_library(stb INTERFACE IMPORTED)
+        set_property(TARGET stb PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/3rdparty/stb/include)
     endif()
 endif()
 
 # Find OpenCV
 if (DARKNET_OPENCV)
-	find_package(OpenCV 3.1 REQUIRED)
+    set(OpenCL_DIR "unset" CACHE STRING "")
+    set(OpenCV_DIR "E:/Opencv310")
+	find_package(OpenCV 3.1 REQUIRED PATHS ${OpenCV_DIR})
 	add_library(opencv INTERFACE IMPORTED)
+    message(OPENCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS})
 	set_property(TARGET opencv PROPERTY
 		INTERFACE_INCLUDE_DIRECTORIES ${OpenCV_INCLUDE_DIRS})
+    message(OPENCV_LIBRARIES: ${OpenCV_LIBS})
     set_property(TARGET opencv PROPERTY
         INTERFACE_LINK_LIBRARIES ${OpenCV_LIBRARIES})
+    message(OPENCV_LIB_PATH: ${OpenCV_LIB_PATH})
+    set_property(TARGET opencv PROPERTY INTERFACE_LINK_DIRECTORIES ${OpenCV_LIB_PATH})
+    set_property(TARGET opencv PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${OpenCV_DIR}/include)
+    set_property(TARGET opencv PROPERTY INTERFACE_LINK_DIRECTORIES ${OpenCV_DIR}/lib ${OpenCV_DIR}/staticlib)
+    set_property(TARGET opencv PROPERTY INTERFACE_LINK_LIBRARIES
+    opencv_calib3d310.lib
+    opencv_core310.lib
+    opencv_features2d310.lib
+    opencv_flann310.lib
+    opencv_highgui310.lib
+    opencv_imgcodecs310.lib
+    opencv_imgproc310.lib
+    opencv_ml310.lib
+    opencv_objdetect310.lib
+    opencv_photo310.lib
+    opencv_shape310.lib
+    opencv_stitching310.lib
+    opencv_superres310.lib
+    opencv_ts310.lib
+    opencv_video310.lib
+    opencv_videoio310.lib
+    opencv_videostab310.lib)
     list (APPEND DARKNET_DEFINITIONS OPENCV)
 endif()
 
 # Find OpenCL
 if (DARKNET_GPU)
+    set(OpenCL_DIR "unset" CACHE STRING "")
 	find_package(OpenCL REQUIRED)
     add_library(opencl INTERFACE IMPORTED)
+    message(CL_INCLUDE_DIR: ${OpenCL_INCLUDE_DIRS})
     set_property(TARGET opencl PROPERTY
     	INTERFACE_INCLUDE_DIRECTORIES ${OpenCL_INCLUDE_DIRS})
+    message(CL_LIBS: ${OpenCL_LIBRARY})
     set_property(TARGET opencl PROPERTY
         INTERFACE_LINK_LIBRARIES ${OpenCL_LIBRARY})
     list (APPEND DARKNET_DEFINITIONS GPU CL_TARGET_OPENCL_VERSION=120)
 	# Raspberry PI
-	#if (DARKNET_ARM)
-	#	list (APPEND DARKNET_DEFINITIONS ARM)
-	#else()
-	#	find_package(clBLAS REQUIRED PATHS "E:\\clBLAS")
-	#	add_library(clblas INTERFACE IMPORTED)
-	#	set_property(TARGET clblas PROPERTY
-	#		INTERFACE_INCLUDE_DIRECTORIES ${CLBLAS_INCLUDE_DIRS})
-	#	set_property(TARGET clblas PROPERTY
-	#		INTERFACE_LINK_LIBRARIES ${CLBLAS_LIBRARIES})
-	#endif()
+	if (DARKNET_ARM)
+		list (APPEND DARKNET_DEFINITIONS ARM)
+	else()
+        set(clBLAS_DIR "unset" CACHE STRING "")
+		find_package(clBLAS REQUIRED PATHS "${clBLAS_DIR}")
+		add_library(clblas INTERFACE IMPORTED)
+        message(clblas_INCLUDE_DIRS:${CLBLAS_INCLUDE_DIRS})
+		set_property(TARGET clblas PROPERTY
+			INTERFACE_INCLUDE_DIRECTORIES ${CLBLAS_INCLUDE_DIRS})
+        message(clblas_LIBRARIES:${CLBLAS_LIBRARIES})
+		set_property(TARGET clblas PROPERTY
+			INTERFACE_LINK_LIBRARIES ${CLBLAS_LIBRARIES})
+	endif()
 endif()
 
 # Safe Training
@@ -190,6 +238,10 @@ set (DARKNET_SOURCES
     "src/l2norm_layer.c"
 )
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set_source_files_properties(${DARKNET_SOURCES} PROPERTIES LANGUAGE "CXX")
+endif()
+
 set (DARKNET_PUBLIC_HEADERS
     "include/darknet.h"
     "src/activation_layer.h"
@@ -198,7 +250,7 @@ set (DARKNET_PUBLIC_HEADERS
     "src/batchnorm_layer.h"
     "src/blas.h"
     "src/box.h"
-    "src/bugfixes.h"
+    #"src/bugfixes.h"
     "src/classifier.h"
     "src/col2im.h"
     "src/connected_layer.h"
@@ -236,7 +288,7 @@ set (DARKNET_PUBLIC_HEADERS
     "src/stb_image.h"
     "src/stb_image_write.h"
     "src/tree.h"
-    "src/unit.h"
+    #"src/unit.h"
     "src/utils.h"
     "src/opencl.h"
     "src/yolo_layer.h"
@@ -251,6 +303,10 @@ set (DARKNET_MAIN_SOURCE
     "examples/darknet.c"
 )
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set_source_files_properties(${DARKNET_MAIN_SOURCE} PROPERTIES LANGUAGE "CXX")
+endif()
+
 set (DARKNET_SOURCES_CXX
     "src/image_opencv.cpp"
 )
@@ -259,31 +315,37 @@ if (DARKNET_CPU)
 	set (DARKNET_CPU_SOURCES
 			"src/cpu.c"
 			)
+    if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+        set_source_files_properties(${DARKNET_CPU} PROPERTIES LANGUAGE "CXX")
+    endif()
 endif()
 
 if (DARKNET_GPU)
 	set (DARKNET_GPU_SOURCES
 	    "src/activation_kernels.c"
-	    "src/activation_kernels.cl"
+	    #"src/activation_kernels.cl"
 	    "src/avgpool_layer_kernels.c"
-	    "src/avgpool_layer_kernels.cl"
+	    #"src/avgpool_layer_kernels.cl"
 	    "src/blas_kernels.c"
-	    "src/blas_kernels.cl"
+	    #"src/blas_kernels.cl"
 	    "src/col2im_kernels.c"
-	    "src/col2im_kernels.cl"
+	    #"src/col2im_kernels.cl"
 	    "src/convolutional_kernels.c"
-	    "src/convolutional_kernels.cl"
+	    #"src/convolutional_kernels.cl"
 	    "src/crop_layer_kernels.c"
-	    "src/crop_layer_kernels.cl"
+	    #"src/crop_layer_kernels.cl"
 	    "src/deconvolutional_kernels.c"
 	    "src/dropout_layer_kernels.c"
-	    "src/dropout_layer_kernels.cl"
+	    #"src/dropout_layer_kernels.cl"
 	    "src/im2col_kernels.c"
-	    "src/im2col_kernels.cl"
+	    #"src/im2col_kernels.cl"
 	    "src/maxpool_layer_kernels.c"
-	    "src/maxpool_layer_kernels.cl"
+	    #"src/maxpool_layer_kernels.cl"
 	    "src/opencl.c"
 	)
+    if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+        set_source_files_properties(${DARKNET_GPU_SOURCES} PROPERTIES LANGUAGE "CXX")
+    endif()
 endif()
 
 if (DARKNET_UNIT)
@@ -305,6 +367,12 @@ function (ConfigureBinary target)
     target_compile_definitions(${target} PUBLIC ${DARKNET_DEFINITIONS})
     target_compile_options(${target} PRIVATE ${DARKNET_CFLAGS})
 
+    if (${CMAKE_SYSTEM_NAME} MATCHES "Windows") 
+        target_link_libraries(${target} POSIX)
+        target_link_libraries(${target} pthread)
+        target_link_libraries(${target} stb)
+    endif()
+
     if (DARKNET_ARM)
         target_link_libraries(${target} opencl)
     elseif (DARKNET_GPU)
@@ -319,7 +387,9 @@ function (ConfigureBinary target)
 #        target_link_libraries(${target} catch)
 #    endif()
 
-    target_link_libraries(${target} "m" "pthread")
+    if (${CMAKE_SYSTEM_NAME} MATCHES "Unix")
+        target_link_libraries(${target} "m" "pthread")
+    endif()
 endfunction()
 
 function (ConfigureLibrary target)
@@ -333,13 +403,9 @@ function (ConfigureLibrary target)
         RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 endfunction()
 
-include_directories(${PROJECT_SOURCE_DIR}/3rdparty/pthreads/include)
-include_directories(${PROJECT_SOURCE_DIR}/3rdparty/stb/include)
-link_directories(${PROJECT_SOURCE_DIR}/3rdparty/pthreads/lib)
-
 if (DARKNET_SHARED)
     add_library(${DARKNET_LIBRARY} SHARED ${DARKNET_SOURCES} ${DARKNET_CPU_SOURCES}
-	   ${DARKNET_GPU_SOURCES} ${DARKNET_WINDOWS_SOURCES} ${DARKNET_SOURCES_CXX})
+	   ${DARKNET_GPU_SOURCES} ${DARKNET_WINDOWS_SOURCES} ${DARKNET_SOURCES_CXX} ${DARKNET_PUBLIC_HEADERS})
     ConfigureBinary(${DARKNET_LIBRARY})
     ConfigureLibrary(${DARKNET_LIBRARY})
 endif()
@@ -355,7 +421,7 @@ endif()
 if (NOT DARKNET_NO_BINARY)
     add_executable(${DARKNET_BINARY} ${DARKNET_SOURCES} ${DARKNET_CPU_SOURCES}
         ${DARKNET_GPU_SOURCES} ${DARKNET_WINDOWS_SOURCES} ${DARKNET_SOURCES_CXX}
-        ${DARKNET_MAIN_SOURCE})
+        ${DARKNET_MAIN_SOURCE} ${DARKNET_PUBLIC_HEADERS})
 
     ConfigureBinary(${DARKNET_BINARY})
 endif()

@@ -12,7 +12,7 @@ void train_cgan(char *datacfg, char *gcfg, char *gweight, int *gpus, int ngpus, 
     char *base = basecfg(gcfg);
     printf("%s\n", base);
     printf("%d\n", ngpus);
-    network **nets = calloc(ngpus, sizeof(network*));
+    network **nets = (network**)calloc(ngpus, sizeof(network*));
 
     for(i = 0; i < ngpus; ++i){
 #ifdef GPU

@@ -167,7 +167,10 @@ void *open_video_stream(const char *f, int c, int w, int h, int fps) {
 image get_image_from_stream_cv(void *p) {
     VideoCapture *cap = (VideoCapture *)p;
     Mat frame;
+#define read_temp read
+#undef read
     (*cap).read(frame);
+#define read read_temp
     return mat_to_image_cv(frame);
 }
 

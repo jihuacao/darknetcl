@@ -37,9 +37,9 @@ load_args get_base_args(network *net)
 	return args;
 }
 
-network *load_network(char *cfg, char *weights, int clear)
+network *load_network(char *cfg, char *weights, int clear, int batch)
 {
-	network *net = parse_network_cfg(cfg);
+	network *net = parse_network_cfg(cfg, batch);
 	if(weights && weights[0] != 0){
 		load_weights(net, weights);
 	}

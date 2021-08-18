@@ -129,6 +129,7 @@ typedef struct size_params{
     int c;
     int index;
     int time_steps;
+	int train;
     network *net;
 } size_params;
 
@@ -1104,7 +1105,7 @@ int is_network(section *s)
             || strcmp(s->type, "[network]")==0);
 }
 
-network *parse_network_cfg(char *filename)
+network *parse_network_cfg(char *filename, int batch)
 {
     list *sections = read_cfg(filename);
     node *n = sections->front;
@@ -1112,6 +1113,9 @@ network *parse_network_cfg(char *filename)
     network *net = make_network(sections->size - 1);
     net->gpu_index = opencl_device_id_t;
     size_params params;
+
+	if (batch > 0) params.train = 0;    // allocates memory for Detection only
+    else params.train = 1;              // allocates memory for Detection & Training
 
     section *s = (section *)n->val;
     list *options = s->options;
@@ -1121,6 +1125,7 @@ network *parse_network_cfg(char *filename)
     params.h = net->h;
     params.w = net->w;
     params.c = net->c;
+	if (batch > 0) net->batch = batch;
     params.inputs = net->inputs;
     params.batch = net->batch;
     params.time_steps = net->time_steps;

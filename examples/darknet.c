@@ -271,12 +271,12 @@ layer normalize_layer(layer l, int n)
 {
     int j;
     l.batch_normalize=1;
-    l.scales = calloc(n, sizeof(float));
+    l.scales = (float*)calloc(n, sizeof(float));
     for(j = 0; j < n; ++j){
         l.scales[j] = 1;
     }
-    l.rolling_mean = calloc(n, sizeof(float));
-    l.rolling_variance = calloc(n, sizeof(float));
+    l.rolling_mean = (float*)calloc(n, sizeof(float));
+    l.rolling_variance = (float*)calloc(n, sizeof(float));
     return l;
 }
 
@@ -418,7 +418,7 @@ int main(int argc, char **argv)
         gpu_index = -1;
     }
     else if(read_arg(argc, argv, "-i")) {
-        gpus = calloc(1, sizeof(int));
+        gpus = (int*)calloc(1, sizeof(int));
         gpus[0] = find_int_arg(argc, argv, "-i", 0);
         ngpus = 1;
         gpu_index = 1;
@@ -429,7 +429,7 @@ int main(int argc, char **argv)
         gpu_index = ngpus;
     }
 	else {
-        gpus = calloc(1, sizeof(int));
+        gpus = (int*)calloc(1, sizeof(int));
         gpus[0] = 0;
         ngpus = 1;
         gpu_index = 1;

@@ -53,6 +53,11 @@ else()
 	    list (APPEND DARKNET_CFLAGS "-Wno-return-type-c-linkage")
 	    list (APPEND DARKNET_CFLAGS "-O2")
     else()
+        # this is for test
+        list(APPEND DARKNET_LINK_CFLAGS "/Debug")
+        list(APPEND DARKNET_CFLAGS "/ZI")
+        list(APPEND DARKNET_CFLAGS "/Od")
+
         add_library(POSIX INTERFACE IMPORTED)
         set_property(TARGET POSIX PROPERTY INTERFACE_INCLUDE_DIRECTORIES "E:/workspace/libunistd/unistd")
         set_property(TARGET POSIX PROPERTY INTERFACE_LINK_DIRECTORIES "E:/workspace/libunistd/build/Release")
@@ -363,9 +368,9 @@ if (DARKNET_UNIT)
 endif()
 
 function (ConfigureBinary target)
-    set_target_properties(${target} PROPERTIES OUTPUT_NAME "darknet")    
     target_compile_definitions(${target} PUBLIC ${DARKNET_DEFINITIONS})
     target_compile_options(${target} PRIVATE ${DARKNET_CFLAGS})
+    target_link_options(${target} PRIVATE ${DARKNET_LINK_CFLAGS})#debug
 
     if (${CMAKE_SYSTEM_NAME} MATCHES "Windows") 
         target_link_libraries(${target} POSIX)
@@ -406,6 +411,7 @@ endfunction()
 if (DARKNET_SHARED)
     add_library(${DARKNET_LIBRARY} SHARED ${DARKNET_SOURCES} ${DARKNET_CPU_SOURCES}
 	   ${DARKNET_GPU_SOURCES} ${DARKNET_WINDOWS_SOURCES} ${DARKNET_SOURCES_CXX} ${DARKNET_PUBLIC_HEADERS})
+    set_target_properties(${DARKNET_LIBRARY} PROPERTIES OUTPUT_NAME "yolo_cl_cpp_dll")
     ConfigureBinary(${DARKNET_LIBRARY})
     ConfigureLibrary(${DARKNET_LIBRARY})
 endif()
@@ -413,6 +419,7 @@ endif()
 if (DARKNET_STATIC)
     add_library(${DARKNET_LIBRARY_STATIC} STATIC ${DARKNET_SOURCES} ${DARKNET_CPU_SOURCES}
        ${DARKNET_GPU_SOURCES} ${DARKNET_WINDOWS_SOURCES} ${DARKNET_SOURCES_CXX})
+    set_target_properties(${DARKNET_LIBRARY_STATIC} PROPERTIES OUTPUT_NAME "yolo_cl_cpp_dll_s")    
     ConfigureBinary(${DARKNET_LIBRARY_STATIC})
     ConfigureLibrary(${DARKNET_LIBRARY_STATIC})
 endif()
@@ -422,6 +429,8 @@ if (NOT DARKNET_NO_BINARY)
     add_executable(${DARKNET_BINARY} ${DARKNET_SOURCES} ${DARKNET_CPU_SOURCES}
         ${DARKNET_GPU_SOURCES} ${DARKNET_WINDOWS_SOURCES} ${DARKNET_SOURCES_CXX}
         ${DARKNET_MAIN_SOURCE} ${DARKNET_PUBLIC_HEADERS})
+    set_target_properties(${DARKNET_BINARY} PROPERTIES OUTPUT_NAME "darknet")
+    target_compile_definitions(${DARKNET_BINARY} PRIVATE DARKNET_BIN)
 
     ConfigureBinary(${DARKNET_BINARY})
 endif()

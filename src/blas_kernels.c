@@ -8,6 +8,7 @@
 #include "opencl.h"
 #include "utils.h"
 #include "blas_kernels.cl"
+#include "blas_kernels2.cl"
 
 #ifdef GPU
 
@@ -16,6 +17,7 @@
 #define OUT OUT_TEMP
 
 cl_program* opencl_blas_kernel_program;
+cl_program* opencl_blas_kernel_program2;
 
 cl_kernel* softmax_device_kernel;
 cl_kernel* opencl_scale_bias_kernel;
@@ -58,6 +60,7 @@ cl_kernel* opencl_wgan_kernel;
 cl_kernel* opencl_inter_kernel;
 cl_kernel* opencl_deinter_kernel;
 cl_kernel* opencl_weighted_sum_kernel;
+
 cl_kernel* opencl_weighted_delta_kernel;
 cl_kernel* opencl_mult_add_into_kernel;
 cl_kernel* opencl_softmax_tree_kernel;
@@ -73,6 +76,7 @@ void blas_kernel_init(void)
 {
     if (opencl_device_id_t == 0) {
         opencl_blas_kernel_program = (cl_program*)calloc(opencl_device_ct_t, sizeof(cl_program));
+        opencl_blas_kernel_program2 = (cl_program*)calloc(opencl_device_ct_t, sizeof(cl_program));
         softmax_device_kernel = (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
         opencl_scale_bias_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
         opencl_backward_scale_kernel= (cl_kernel*)calloc(opencl_device_ct_t, sizeof(cl_kernel));
@@ -127,8 +131,8 @@ void blas_kernel_init(void)
     }
     
     opencl_load_buffer(blas_kernel_source, strlen(blas_kernel_source), &opencl_blas_kernel_program[opencl_device_id_t]);
+    opencl_load_buffer(blas_kernel_source2, strlen(blas_kernel_source2), &opencl_blas_kernel_program2[opencl_device_id_t]);
 
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "softmax_device", &softmax_device_kernel[opencl_device_id_t]);
     opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "scale_bias_kernel", &opencl_scale_bias_kernel[opencl_device_id_t]);
     opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "backward_scale_kernel", &opencl_backward_scale_kernel[opencl_device_id_t]);
     opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "add_bias_kernel", &opencl_add_bias_kernel[opencl_device_id_t]);
@@ -166,19 +170,21 @@ void blas_kernel_init(void)
     opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "l2_kernel", &opencl_l2_kernel[opencl_device_id_t]);
     opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "l1_kernel", &opencl_l1_kernel[opencl_device_id_t]);
     opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "wgan_kernel", &opencl_wgan_kernel[opencl_device_id_t]);
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "deinter_kernel", &opencl_deinter_kernel[opencl_device_id_t]);
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "inter_kernel", &opencl_inter_kernel[opencl_device_id_t]);
     opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "weighted_sum_kernel", &opencl_weighted_sum_kernel[opencl_device_id_t]);
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "weighted_delta_kernel", &opencl_weighted_delta_kernel[opencl_device_id_t]);
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "mult_add_into_kernel", &opencl_mult_add_into_kernel[opencl_device_id_t]);
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "softmax_tree_kernel", &opencl_softmax_tree_kernel[opencl_device_id_t]);
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "softmax_kernel", &opencl_softmax_kernel[opencl_device_id_t]);
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "scale_mask_kernel", &opencl_scale_mask_kernel[opencl_device_id_t]);
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "dot_kernel", &opencl_dot_kernel[opencl_device_id_t]);
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "upsample_kernel", &opencl_upsample_kernel[opencl_device_id_t]);
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "gemm_kernel", &opencl_gemm_kernel[opencl_device_id_t]);
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "mean_array_kernel", &opencl_mean_array_kernel[opencl_device_id_t]);
-    opencl_create_kernel(&opencl_blas_kernel_program[opencl_device_id_t], "scal_add_kernel", &opencl_scal_add_kernel[opencl_device_id_t]);
+
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "deinter_kernel", &opencl_deinter_kernel[opencl_device_id_t]);
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "inter_kernel", &opencl_inter_kernel[opencl_device_id_t]);
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "softmax_device", &softmax_device_kernel[opencl_device_id_t]);
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "weighted_delta_kernel", &opencl_weighted_delta_kernel[opencl_device_id_t]);
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "mult_add_into_kernel", &opencl_mult_add_into_kernel[opencl_device_id_t]);
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "softmax_tree_kernel", &opencl_softmax_tree_kernel[opencl_device_id_t]);
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "softmax_kernel", &opencl_softmax_kernel[opencl_device_id_t]);
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "scale_mask_kernel", &opencl_scale_mask_kernel[opencl_device_id_t]);
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "dot_kernel", &opencl_dot_kernel[opencl_device_id_t]);
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "upsample_kernel", &opencl_upsample_kernel[opencl_device_id_t]);
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "gemm_kernel", &opencl_gemm_kernel[opencl_device_id_t]);
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "mean_array_kernel", &opencl_mean_array_kernel[opencl_device_id_t]);
+    opencl_create_kernel(&opencl_blas_kernel_program2[opencl_device_id_t], "scal_add_kernel", &opencl_scal_add_kernel[opencl_device_id_t]);
 }
 
 void blas_kernel_release(void)

@@ -1,5 +1,14 @@
 #ifndef DARKNET_API
 #define DARKNET_API
+#ifdef libdarknet_EXPORTS
+#define API __declspec(dllexport)
+#else
+#ifdef DARKNET_BIN
+#define API
+#else
+#define API __declspec(dllimport)
+#endif
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -847,7 +856,7 @@ typedef struct{
 } box_label;
 
 
-network *load_network(char *cfg, char *weights, int clear);
+network *load_network(char *cfg, char *weights, int clear, int batch=0);
 load_args get_base_args(network *net);
 
 void free_data(data d);
@@ -955,7 +964,7 @@ char *option_find_str_quiet(list *l, char *key, char *def);
 int option_find_int(list *l, char *key, int def);
 int option_find_int_quiet(list *l, char *key, int def);
 
-network *parse_network_cfg(char *filename);
+network *parse_network_cfg(char *filename, int batch=0);
 void save_weights(network *net, char *filename);
 void load_weights(network *net, char *filename);
 void save_weights_upto(network *net, char *filename, int cutoff);
@@ -1122,25 +1131,25 @@ int make_directory(char *path, int mode);
 unsigned long custom_hash(char *str);
 void diounms_sort_y4(detection *dets, int total, int classes, float thresh, NMS_KIND nms_kind, float beta1);
 
-void predict_classifier(char *datacfg, char *cfgfile, char *weightfile, char *filename, int top);
-void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filename, float thresh, float hier_thresh, char *outfile, int fullscreen);
-void test_ddetector(char *datacfg, char *cfgfile, char *weightfile, char *in_dir, float thresh, float hier_thresh, char *out_dir);
-float validate_detector_map(char *datacfg, char *cfgfile, char *weightfile, float thresh_calc_avg_iou, const float iou_thresh, const int map_points, int letter_box, network *existing_net);
-void run_yolo(int argc, char **argv);
-void run_yolo4(int argc, char **argv);
-void run_detector(int argc, char **argv);
-void run_coco(int argc, char **argv);
-void run_captcha(int argc, char **argv);
-void run_nightmare(int argc, char **argv);
-void run_classifier(int argc, char **argv);
-void run_regressor(int argc, char **argv);
-void run_segmenter(int argc, char **argv);
-void run_char_rnn(int argc, char **argv);
-void run_tag(int argc, char **argv);
-void run_cifar(int argc, char **argv);
-void run_go(int argc, char **argv);
-void run_art(int argc, char **argv);
-void run_super(int argc, char **argv);
-void run_lsd(int argc, char **argv);
+API void predict_classifier(char *datacfg, char *cfgfile, char *weightfile, char *filename, int top);
+API void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filename, float thresh, float hier_thresh, char *outfile, int fullscreen);
+API void test_ddetector(char *datacfg, char *cfgfile, char *weightfile, char *in_dir, float thresh, float hier_thresh, char *out_dir);
+API float validate_detector_map(char *datacfg, char *cfgfile, char *weightfile, float thresh_calc_avg_iou, const float iou_thresh, const int map_points, int letter_box, network *existing_net);
+API void run_yolo(int argc, char **argv);
+API void run_yolo4(int argc, char **argv);
+API void run_detector(int argc, char **argv);
+API void run_coco(int argc, char **argv);
+API void run_captcha(int argc, char **argv);
+API void run_nightmare(int argc, char **argv);
+API void run_classifier(int argc, char **argv);
+API void run_regressor(int argc, char **argv);
+API void run_segmenter(int argc, char **argv);
+API void run_char_rnn(int argc, char **argv);
+API void run_tag(int argc, char **argv);
+API void run_cifar(int argc, char **argv);
+API void run_go(int argc, char **argv);
+API void run_art(int argc, char **argv);
+API void run_super(int argc, char **argv);
+API void run_lsd(int argc, char **argv);
 
 #endif

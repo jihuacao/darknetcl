@@ -19,10 +19,8 @@ int gpu_index = 1;
 
 #include "blas.h"
 
-
 int *gpusg;
 int ngpusg;
-
 #ifdef WIN32
 __declspec(thread) int opencl_device_id_t;
 __declspec(thread) int opencl_device_ct_t;
@@ -30,6 +28,12 @@ __declspec(thread) int opencl_device_ct_t;
 __thread int opencl_device_id_t;
 __thread int opencl_device_ct_t;
 #endif
+cl_int *cl_native_double_width_s;
+size_t *cl_native_max_group_size_s;
+size_t *cl_native_address_bits_s;
+cl_context opencl_context;
+cl_command_queue* opencl_queues;
+cl_device_id* opencl_devices;
 
 cl_context_properties* cl_props;
 

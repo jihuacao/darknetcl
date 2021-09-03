@@ -656,9 +656,15 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 
 
         float *X = sized.data;
+		/*opt: the test tag*/
+        network_predict(net, X);
+		sleep(2);
+		/*opt: the test tag*/
         time=what_time_is_it_now();
+		auto t = clock();
         network_predict(net, X);
         printf("%s: Predicted in %f seconds.\n", input, what_time_is_it_now()-time);
+        printf("%s: Predicted in %f seconds.\n", input, ((double)(clock() - t)) / CLOCKS_PER_SEC);
         int nboxes = 0;
         detection *dets = get_network_boxes(net, im.w, im.h, thresh, hier_thresh, 0, 1, &nboxes);
         //printf("%d\n", nboxes);

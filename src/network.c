@@ -272,6 +272,7 @@ void forward_network(network *netp)
 #ifdef GPU
     if(netp->gpu_index >= 0){
         forward_network_gpu(netp);   
+		/*opt: */
         return;
     }
 #endif
@@ -987,10 +988,12 @@ void forward_network_gpu(network *netp)
 	}
 
 	int i;
+	int d = 0;
 	for(i = 0; i < net.n; ++i){
 		net.index = i;
 		layer l = net.layers[i];
 		if(l.delta_gpu.ptr){
+			// delteµÄ×÷ÓÃ
 			fill_gpu(l.outputs * l.batch, 0, l.delta_gpu, 1);
 		}
 #ifdef BENCHMARK
@@ -1004,6 +1007,16 @@ void forward_network_gpu(network *netp)
 		const char* layerName[] = { "CONVOLUTIONAL","DECONVOLUTIONAL","CONNECTED", "MAXPOOL", "SOFTMAX", "DETECTION", "DROPOUT", "CROP", "ROUTE", "COST", "NORMALIZATION", "AVGPOOL", "LOCAL", "SHORTCUT", "ACTIVE", "RNN", "GRU", "LSTM", "CRNN", "BATCHNORM", "NETWORK", "XNOR", "REGION", "YOLO", "YOLO4", "ISEG", "REORG", "UPSAMPLE", "LOGXENT", "L2NORM", "BLANK"};
 		printf("FW %s\t%d\n", layerName[(int)l.type], (int)time_taken);
 #endif
+		/*opt: the test tag*/
+		//if (d < 10) {
+		//	--i;
+		//	++d;
+		//	continue;
+		//}
+		//else {
+		//	i = net.n;
+		//}
+		/*opt: the test tag*/
 		net.input_gpu = l.output_gpu;
 		net.input = l.output;
 		if(l.truth) {
